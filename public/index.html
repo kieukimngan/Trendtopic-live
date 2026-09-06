@@ -1,92 +1,314 @@
 <!doctype html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TrendTopic Live</title>
 <style>
 :root{--ink:#142036;--muted:#64748b;--line:#e5eaf2;--violet:#5b46db;--violet2:#4330b7;--bg:#f6f8fc;--shadow:0 18px 55px rgba(35,45,78,.11)}
-*{box-sizing:border-box}body{margin:0;color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;background:radial-gradient(circle at 4% 0,#e7e3ff 0,transparent 28rem),radial-gradient(circle at 99% 10%,#daf6ee 0,transparent 25rem),var(--bg)}
-main{width:min(1080px,calc(100% - 32px));margin:auto}header{text-align:center;padding:54px 0 20px}.kicker{font-size:.77rem;letter-spacing:.15em;color:var(--violet);font-weight:800;text-transform:uppercase}
-h1{font-size:clamp(2.3rem,6vw,4.3rem);line-height:1.02;letter-spacing:-.065em;margin:11px 0 15px}h1 em{font-style:normal;color:var(--violet)}.intro{max-width:740px;margin:auto;color:var(--muted)}
-.card{background:rgba(255,255,255,.92);border:1px solid #fff;border-radius:24px;box-shadow:var(--shadow)}.controls{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:13px;padding:22px;margin-top:25px}.custom{grid-column:span 2}.input-wrap{display:flex;gap:7px}input,select,button{height:50px;border-radius:13px;font:inherit}input,select{width:100%;border:1px solid var(--line);background:#fff;padding:0 12px;color:var(--ink)}input:focus,select:focus{outline:3px solid #e8e4ff;border-color:var(--violet)}
-label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:var(--muted);margin-bottom:7px}button{border:0;cursor:pointer;font-weight:800;padding:0 17px}.primary{background:var(--violet);color:#fff;box-shadow:0 9px 20px rgba(91,70,219,.25)}.suggest{background:#eeecff;color:var(--violet2);white-space:nowrap}button:disabled{opacity:.6;cursor:wait}
-.tabs{display:flex;gap:8px;margin:20px 0 -5px}.tab{background:transparent;color:var(--muted);height:42px}.tab.active{background:#eae7ff;color:var(--violet2)}.panel[hidden]{display:none}.result{position:relative;overflow:hidden;margin:21px 0;padding:clamp(30px,6vw,62px)}.result:after{content:"✦";position:absolute;right:25px;top:-30px;color:#efedff;font-size:11rem}.content{position:relative;z-index:1}.badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}.badge{font-weight:800;font-size:.76rem;padding:5px 10px;border-radius:99px;background:#edeaff;color:#4934be}.hot{background:#dcf7ef;color:#08745f}
-#topic{max-width:900px;min-height:1.2em;margin:0;font-size:clamp(2.2rem,6vw,4.5rem);letter-spacing:-.06em;line-height:1.05}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:30px}.secondary{background:#eeecff;color:var(--violet2)}#meta{color:var(--muted);font-size:.88rem;margin-top:20px}
-.signals{margin:18px 0 0;padding-top:18px;border-top:1px solid var(--line)}.signals summary{cursor:pointer;color:var(--muted);font-size:.88rem;font-weight:700}.signals ul{padding-left:20px;color:var(--muted);font-size:.85rem}.signals a{color:var(--violet);text-decoration:none}.notice{padding:15px 18px;margin:0 0 40px;color:var(--muted);font-size:.9rem;border-left:3px solid #cabfff;background:#f1efff;border-radius:0 12px 12px 0}
-.saved-head{padding:25px 28px 8px;display:flex;align-items:center;justify-content:space-between;gap:15px}.saved-head h2{margin:0;font-size:1.5rem}.saved-list{padding:15px 28px 28px;display:grid;gap:12px}.saved-item{border:1px solid var(--line);border-radius:16px;padding:17px;display:flex;align-items:start;justify-content:space-between;gap:15px}.saved-item h3{margin:0 0 4px;font-size:1.1rem}.saved-item p{margin:0;color:var(--muted);font-size:.85rem}.delete{background:#fff0f0;color:#c43b4d;height:38px}.empty{color:var(--muted);text-align:center;padding:35px}footer{text-align:center;color:var(--muted);font-size:.82rem;padding:15px 0 28px}
-@media(max-width:800px){.controls{grid-template-columns:1fr 1fr}.custom{grid-column:span 2}.controls .primary{grid-column:span 2}.controls button{width:100%}}@media(max-width:520px){.controls{grid-template-columns:1fr}.custom,.controls .primary{grid-column:span 1}.input-wrap{flex-direction:column}.saved-item{flex-direction:column}.delete{width:100%}}
-</style></head><body><main>
-<header><div class="kicker">TrendTopic · Live research</div><h1>Topic rộng,<br><em>nguồn tin không giới hạn.</em></h1><p class="intro">Kết nối headline Việt Nam và quốc tế để tìm ra chủ đề đáng đào sâu — rồi lưu lại khi bạn cần.</p></header>
-<nav class="tabs" aria-label="Điều hướng"><button class="tab active" data-tab="explore">✦ Khám phá</button><button class="tab" data-tab="saved">♡ Topic đã lưu <span id="savedCount"></span></button></nav>
-<section id="explorePanel" class="panel">
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font:16px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(circle at 4% 0,#e7e3ff 0,transparent 28rem),radial-gradient(circle at 99% 10%,#daf6ee 0,transparent 25rem),var(--bg)}
+main{width:min(1050px,calc(100% - 32px));margin:auto}
+header{text-align:center;padding:65px 0 25px}
+.kicker{font-size:.77rem;letter-spacing:.15em;color:var(--violet);font-weight:800;text-transform:uppercase}
+h1{font-size:clamp(2.3rem,6vw,4.35rem);line-height:1.02;letter-spacing:-.065em;margin:11px 0 15px}
+h1 em{font-style:normal;color:var(--violet)}
+.intro{max-width:740px;margin:auto;color:var(--muted);font-size:1.05rem}
+.card{background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.92);border-radius:24px;box-shadow:var(--shadow);backdrop-filter:blur(10px)}
+.controls{display:grid;grid-template-columns:1fr auto;gap:14px;padding:22px;margin-top:25px}
+label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:var(--muted);margin:0 0 7px}
+select,button{height:50px;border-radius:13px;font:inherit}
+select{width:100%;border:1px solid var(--line);background:white;color:var(--ink);padding:0 12px}
+button{border:0;cursor:pointer;font-weight:800;padding:0 22px;transition:transform .14s,background .14s}
+button:hover:not(:disabled){transform:translateY(-2px)}
+button:disabled{opacity:.65;cursor:wait}
+.primary{background:var(--violet);color:white;box-shadow:0 9px 20px rgba(91,70,219,.25)}
+.primary:hover{background:var(--violet2)}
+.result{position:relative;overflow:hidden;margin:21px 0;padding:clamp(30px,6vw,62px)}
+.result:after{content:"✦";position:absolute;right:25px;top:-28px;color:#efedff;font-size:11rem;line-height:1}
+.content{position:relative;z-index:1}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.badge{font-weight:800;font-size:.76rem;padding:5px 10px;border-radius:100px;background:#edeaff;color:#4934be}
+.badge.hot{background:#fff1d8;color:#a85f00}
+#topic{max-width:880px;min-height:1.25em;margin:0;font-size:clamp(2.25rem,6vw,4.65rem);letter-spacing:-.065em;line-height:1.04}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:30px}
+.secondary{color:var(--violet2);background:#eeecff}
+#meta{margin:22px 0 0;color:var(--muted);font-size:.88rem}
+.source{margin:10px 0 0;font-size:.83rem;color:var(--muted)}
+.source a{color:var(--violet);text-decoration:none}
+.notice{padding:15px 18px;margin:0 0 28px;color:var(--muted);font-size:.9rem;border-left:3px solid #cabfff;background:#f1efff;border-radius:0 12px 12px 0}
+.saved{padding:26px;margin:0 0 45px}
+.saved-header{display:flex;gap:16px;justify-content:space-between;align-items:end;margin-bottom:15px}
+.saved h2{font-size:1.3rem;letter-spacing:-.03em;margin:0}
+.saved-header p{margin:3px 0 0;color:var(--muted);font-size:.88rem}
+.saved-list{display:grid;gap:10px}
+.saved-item{display:flex;align-items:center;justify-content:space-between;gap:18px;border:1px solid var(--line);border-radius:15px;padding:14px 16px;background:#fff}
+.saved-item strong{display:block;font-size:1.02rem}
+.saved-item small{display:block;color:var(--muted);margin-top:3px}
+.empty{margin:0;padding:15px;color:var(--muted);border:1px dashed #cfd6e2;border-radius:14px;text-align:center}
+.info{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:45px}
+.info article{padding:21px}.info i{font-style:normal;font-size:1.45rem}.info h2{font-size:1rem;margin:10px 0 6px}.info p{margin:0;color:var(--muted);font-size:.91rem}
+footer{text-align:center;color:var(--muted);font-size:.82rem;padding-bottom:28px}
+@media(max-width:700px){.controls,.info{grid-template-columns:1fr}.controls button{width:100%}header{padding-top:42px}.saved-header{align-items:start;flex-direction:column}.saved-item{align-items:start;flex-direction:column;gap:5px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="kicker">TrendTopic · Tin tức trực tiếp</div>
+  <h1>Chủ đề rộng,<br><em>bắt nhịp thế giới.</em></h1>
+  <p class="intro">Chọn lĩnh vực, web đọc dòng tin mới trên Internet và tạo một cụm topic ngắn để bạn phát triển nội dung.</p>
+</header>
+
 <section class="card controls">
-<div><label for="category">Lĩnh vực</label><select id="category"><option>Đang tải…</option></select></div>
-<div><label for="scope">Nguồn research</label><select id="scope"><option value="all">✨ Việt Nam + Quốc tế</option><option value="vn">🇻🇳 Việt Nam</option><option value="global">🌍 Quốc tế</option></select></div>
-<div><label for="style">Phong cách</label><select id="style"><option value="editorial">Rõ ràng & có chiều sâu</option><option value="creative">Gợi mở & sáng tạo</option></select></div>
-<button class="primary" id="generateBtn">✦ Tạo topic</button>
-<div class="custom"><label for="query">Topic bạn muốn tìm hiểu <small>(không bắt buộc)</small></label><div class="input-wrap"><input id="query" list="suggestions" maxlength="100" placeholder="Ví dụ: AI thay đổi công việc như thế nào?"><datalist id="suggestions"></datalist><button class="suggest" id="suggestBtn" type="button">✦ Tự điền</button></div></div>
+  <div>
+    <label for="category">Lĩnh vực</label>
+    <select id="category"><option>Đang tải lĩnh vực…</option></select>
+  </div>
+  <button type="button" class="primary" id="generateBtn">✦ Tạo topic</button>
 </section>
-<section class="card result" aria-live="polite"><div class="content">
-<div class="badges" id="badges"></div><h2 id="topic">Đang kết nối xu hướng…</h2>
-<div class="actions"><button class="primary" id="anotherBtn">↻ Topic khác</button><button class="secondary" id="saveBtn">♡ Lưu topic</button><button class="secondary" id="copyBtn">▣ Sao chép</button></div>
-<p id="meta"></p><details class="signals" id="signalBox"><summary>Xem các tín hiệu tin tức đã dùng</summary><ul id="signals"></ul></details>
-</div></section>
-<p class="notice"><strong>Mẹo:</strong> chọn <em>Việt Nam + Quốc tế</em> để tăng độ đa dạng. Thêm API key trong <code>.env</code> nếu bạn muốn AI tổng hợp ngữ nghĩa sâu hơn; không có key, app vẫn tạo topic từ nguồn tin trực tiếp.</p>
+
+<section class="card result" aria-live="polite">
+  <div class="content">
+    <div class="badges" id="badges"></div>
+    <h2 id="topic">Đang kết nối nguồn tin…</h2>
+    <div class="actions">
+      <button type="button" class="primary" id="anotherBtn">↻ Topic khác</button>
+      <button type="button" class="secondary" id="saveBtn">♡ Lưu topic</button>
+      <button type="button" class="secondary" id="copyBtn">▣ Sao chép</button>
+    </div>
+    <p id="meta"></p>
+    <p class="source" id="source"></p>
+  </div>
 </section>
-<section id="savedPanel" class="panel" hidden><section class="card"><div class="saved-head"><div><h2>Topic đã lưu</h2><p id="savedSubtitle">Lưu lại để xem riêng bất cứ lúc nào.</p></div><button class="secondary" id="clearSaved">Xóa tất cả</button></div><div class="saved-list" id="savedList"></div></section></section>
-<footer>TrendTopic Live v3 · RSS cập nhật tự động · API key chỉ ở server.</footer>
-</main><script>
-(()=>{"use strict";const $=id=>document.getElementById(id), STORE="trendtopic.saved.v1";
-const category=$("category"),scope=$("scope"),style=$("style"),query=$("query"),topic=$("topic"),badges=$("badges"),meta=$("meta"),signals=$("signals");
-const generateBtn=$("generateBtn"),anotherBtn=$("anotherBtn"),copyBtn=$("copyBtn"),saveBtn=$("saveBtn"),suggestBtn=$("suggestBtn"),suggestions=$("suggestions"),savedList=$("savedList"),savedCount=$("savedCount");let current=null;
-const esc=s=>{const d=document.createElement("div");d.textContent=s||"";return d.innerHTML}; const scopeLabel={vn:"Việt Nam",global:"Quốc tế",all:"Việt Nam + Quốc tế"};
-const getSaved = async () => {
-  try {
-    const response = await fetch("/api/saved-topics");
-    if (!response.ok) throw new Error("Không thể tải topic đã lưu");
-    return await response.json();
-  } catch (error) {
-    console.error(error);
-    return [];
+
+<p class="notice"><strong>Cách hoạt động:</strong> Topic được tổng hợp từ headline RSS mới. Topic bạn lưu sẽ được ghi vào database chung, vì vậy mọi người truy cập website đều có thể xem danh sách này.</p>
+
+<section class="card saved">
+  <div class="saved-header">
+    <div>
+      <h2>Topic đã lưu</h2>
+      <p>Danh sách dùng chung cho tất cả người truy cập website.</p>
+    </div>
+  </div>
+  <div class="saved-list" id="savedList">
+    <p class="empty">Đang tải các topic đã lưu…</p>
+  </div>
+</section>
+
+<section class="info">
+  <article class="card"><i>◉</i><h2>Nhiều lĩnh vực</h2><p>Công nghệ, khoa học, khí hậu, giáo dục, sức khỏe, thể thao, văn hóa, du lịch và nhiều hơn.</p></article>
+  <article class="card"><i>↻</i><h2>Tin mới, không kho cũ</h2><p>Topic sinh từ headline RSS hiện tại; dữ liệu không được hard-code thành danh sách topic.</p></article>
+  <article class="card"><i>∞</i><h2>Lưu dùng chung</h2><p>Những topic được lưu có thể được xem bởi tất cả người dùng truy cập website.</p></article>
+</section>
+
+<footer>TrendTopic Live · Chạy qua server để bảo vệ API key và tránh giới hạn CORS.</footer>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  const $ = id => document.getElementById(id);
+  const categoryEl = $("category");
+  const topicEl = $("topic");
+  const badgesEl = $("badges");
+  const metaEl = $("meta");
+  const sourceEl = $("source");
+  const generateBtn = $("generateBtn");
+  const anotherBtn = $("anotherBtn");
+  const saveBtn = $("saveBtn");
+  const copyBtn = $("copyBtn");
+  const savedListEl = $("savedList");
+
+  let currentTopic = "";
+  let currentCategory = "";
+  let currentSourceCount = 0;
+
+  function escapeHtml(value = "") {
+    const d = document.createElement("div");
+    d.textContent = String(value);
+    return d.innerHTML;
   }
-};
 
-const setSaved = async (topic, category = "", sourceCount = 0) => {
-  const response = await fetch("/api/saved-topics", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      topic,
-      category,
-      sourceCount
-    })
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || "Không thể lưu topic");
+  function formatDate(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? "" : date.toLocaleString("vi-VN");
   }
 
-  return data;
-};
+  async function loadCategories() {
+    const res = await fetch("/api/categories");
+    if (!res.ok) throw new Error("Không tải được danh mục.");
+    const categories = await res.json();
 
-function renderSaved(){const list=getSaved();savedCount.textContent=list.length?`(${list.length})`:"";$("savedSubtitle").textContent=list.length?`${list.length} topic được lưu trên thiết bị này.`:"Lưu lại để xem riêng bất cứ lúc nào.";
-savedList.innerHTML=list.length?list.map(x=>`<article class="saved-item"><div><h3>${esc(x.topic)}</h3><p>${esc(x.category)} · ${esc(x.scope)} · Lưu ${new Date(x.savedAt).toLocaleString("vi-VN",{dateStyle:"medium",timeStyle:"short"})}</p></div><button class="delete" data-delete="${esc(x.id)}">Xóa</button></article>`).join(""):`<div class="empty">Chưa có topic nào được lưu. Hãy quay lại Khám phá và bấm “Lưu topic”.</div>`;
-document.querySelectorAll("[data-delete]").forEach(b=>b.onclick=()=>{setSaved(getSaved().filter(x=>x.id!==b.dataset.delete));renderSaved()})}
-function showTab(name){document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.tab===name));$("explorePanel").hidden=name!=="explore";$("savedPanel").hidden=name!=="saved";if(name==="saved")renderSaved()}
-document.querySelectorAll(".tab").forEach(x=>x.onclick=()=>showTab(x.dataset.tab));
-async function loadSuggestions(){try{const r=await fetch(`/api/suggestions?category=${encodeURIComponent(category.value)}`),data=await r.json();suggestions.innerHTML=data.map(x=>`<option value="${esc(x)}">`).join("")}catch{}}
-async function load(){const r=await fetch("/api/categories");if(!r.ok)throw Error("Không tải được danh sách lĩnh vực.");const data=await r.json();category.innerHTML=data.map(x=>`<option value="${x.id}">${esc(x.label)}</option>`).join("");await loadSuggestions()}
-async function create(){
-generateBtn.disabled=anotherBtn.disabled=true;topic.textContent="Đang đọc xu hướng mới…";badges.innerHTML="";meta.textContent="";signals.innerHTML="";saveBtn.textContent="♡ Lưu topic";current=null;
-try{const url=`/api/topic?category=${encodeURIComponent(category.value)}&scope=${encodeURIComponent(scope.value)}&style=${encodeURIComponent(style.value)}&q=${encodeURIComponent(query.value.trim())}`;const r=await fetch(url);const d=await r.json();if(!r.ok)throw Error(d.error||"Không tạo được topic.");
-current=d;topic.textContent=d.topic;badges.innerHTML=`<span class="badge">${esc(d.category)}</span><span class="badge hot">${esc(scopeLabel[d.scope])}</span><span class="badge">${esc(d.mode)}</span>`;
-const time=new Date(d.updatedAt).toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"});meta.textContent=`Phân tích ${d.sourceCount} headline · cập nhật ${time}${d.cached?" · dùng cache":""}`;
-signals.innerHTML=d.signals.map(x=>`<li><a href="${esc(x.link)}" target="_blank" rel="noopener noreferrer">${esc(x.title)}${x.source?` <small>(${esc(x.source)})</small>`:""}</a></li>`).join("");
-}catch(e){topic.textContent="Chưa tạo được topic";meta.textContent=e.message||"Hãy kiểm tra kết nối và thử lại."}finally{generateBtn.disabled=anotherBtn.disabled=false}}
-async function copy(){if(!current)return;try{await navigator.clipboard.writeText(current.topic)}catch{}copyBtn.textContent="✓ Đã sao chép";setTimeout(()=>copyBtn.textContent="▣ Sao chép",1200)}
-function save(){if(!current)return;const list=getSaved();if(list.some(x=>x.topic===current.topic)){saveBtn.textContent="✓ Đã lưu rồi";return}list.unshift({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),topic:current.topic,category:current.category,scope:scopeLabel[current.scope],savedAt:new Date().toISOString(),signals:current.signals});setSaved(list);saveBtn.textContent="✓ Đã lưu";renderSaved()}
-generateBtn.onclick=create;anotherBtn.onclick=create;copyBtn.onclick=copy;saveBtn.onclick=save;suggestBtn.onclick=async()=>{await loadSuggestions();const options=[...suggestions.options];if(options.length){query.value=options[Math.floor(Math.random()*options.length)].value;query.focus()}};category.onchange=loadSuggestions;query.onkeydown=e=>{if(e.key==="Enter")create()};$("clearSaved").onclick=()=>{if(confirm("Xóa toàn bộ topic đã lưu trên thiết bị này?")){setSaved([]);renderSaved()}};
-renderSaved();load().then(create).catch(e=>{topic.textContent="Không kết nối được server";meta.textContent=e.message+" Hãy chạy npm start.";});
-})();</script></body></html>
+    categoryEl.innerHTML = categories
+      .map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.label)}</option>`)
+      .join("");
+  }
+
+  async function createTopic() {
+    if (generateBtn.disabled) return;
+
+    generateBtn.disabled = true;
+    anotherBtn.disabled = true;
+    saveBtn.disabled = true;
+    generateBtn.textContent = "Đang cập nhật…";
+    topicEl.textContent = "Đang lấy xu hướng mới…";
+    badgesEl.innerHTML = "";
+    metaEl.textContent = "";
+    sourceEl.textContent = "";
+
+    try {
+      const res = await fetch(
+        `/api/topic?category=${encodeURIComponent(categoryEl.value)}`,
+        { headers: { Accept: "application/json" } }
+      );
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Không thể tạo topic.");
+
+      currentTopic = data.topic || "";
+      currentCategory = data.category || "";
+      currentSourceCount = Number(data.sourceCount || 0);
+
+      topicEl.textContent = currentTopic || "Chưa tạo được topic";
+      badgesEl.innerHTML = `
+        <span class="badge">${escapeHtml(currentCategory)}</span>
+        ${data.signal ? `<span class="badge hot">${escapeHtml(data.signal)}</span>` : ""}
+        <span class="badge">Topic cụ thể để thảo luận</span>
+      `;
+
+      const time = data.updatedAt
+        ? new Date(data.updatedAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })
+        : "";
+
+      metaEl.textContent = [
+        data.mode,
+        currentSourceCount ? `${currentSourceCount} headline` : "",
+        time ? `cập nhật ${time}` : "",
+        data.cached ? "dùng cache nhanh" : ""
+      ].filter(Boolean).join(" · ");
+
+      sourceEl.innerHTML = data.sourceUrl
+        ? `Tín hiệu gốc: <a target="_blank" rel="noopener" href="${escapeHtml(data.sourceUrl)}">${escapeHtml(data.sourceHeadline || "Xem bài báo")}</a>`
+        : "";
+
+      saveBtn.disabled = !currentTopic;
+    } catch (err) {
+      currentTopic = "";
+      saveBtn.disabled = true;
+      topicEl.textContent = "Chưa lấy được topic";
+      metaEl.textContent = err.message || "Kiểm tra kết nối mạng, sau đó thử lại.";
+    } finally {
+      generateBtn.disabled = false;
+      anotherBtn.disabled = false;
+      generateBtn.textContent = "✦ Tạo topic";
+    }
+  }
+
+  async function copyTopic() {
+    if (!currentTopic) return;
+
+    try {
+      await navigator.clipboard.writeText(currentTopic);
+    } catch {
+      const t = document.createElement("textarea");
+      t.value = currentTopic;
+      document.body.append(t);
+      t.select();
+      document.execCommand("copy");
+      t.remove();
+    }
+
+    copyBtn.textContent = "✓ Đã sao chép";
+    setTimeout(() => { copyBtn.textContent = "▣ Sao chép"; }, 1200);
+  }
+
+  async function getSaved() {
+    const res = await fetch("/api/saved-topics", {
+      headers: { Accept: "application/json" }
+    });
+
+    if (!res.ok) throw new Error("Không thể tải các topic đã lưu.");
+    return await res.json();
+  }
+
+  async function setSaved(topic, category, sourceCount = 0) {
+    const res = await fetch("/api/saved-topics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ topic, category, sourceCount })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Không thể lưu topic.");
+    return data;
+  }
+
+  async function renderSaved() {
+    try {
+      const savedTopics = await getSaved();
+
+      if (!savedTopics.length) {
+        savedListEl.innerHTML = `<p class="empty">Chưa có topic nào được lưu.</p>`;
+        return;
+      }
+
+      savedListEl.innerHTML = savedTopics.map(item => `
+        <article class="saved-item">
+          <div>
+            <strong>${escapeHtml(item.topic)}</strong>
+            <small>${escapeHtml(item.category || "Khám phá")} · ${formatDate(item.created_at)}</small>
+          </div>
+          <span class="badge">${Number(item.source_count || 0)} headline</span>
+        </article>
+      `).join("");
+    } catch (err) {
+      savedListEl.innerHTML = `<p class="empty">Không tải được topic đã lưu. Hãy kiểm tra API trên server.</p>`;
+      console.error(err);
+    }
+  }
+
+  async function saveCurrentTopic() {
+    if (!currentTopic || saveBtn.disabled) return;
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Đang lưu…";
+
+    try {
+      await setSaved(currentTopic, currentCategory, currentSourceCount);
+      await renderSaved();
+      saveBtn.textContent = "✓ Đã lưu chung";
+    } catch (err) {
+      alert(err.message || "Không thể lưu topic.");
+      console.error(err);
+      saveBtn.textContent = "♡ Lưu topic";
+      saveBtn.disabled = false;
+      return;
+    }
+
+    setTimeout(() => {
+      saveBtn.textContent = "♡ Lưu topic";
+      saveBtn.disabled = !currentTopic;
+    }, 1500);
+  }
+
+  generateBtn.addEventListener("click", createTopic);
+  anotherBtn.addEventListener("click", createTopic);
+  saveBtn.addEventListener("click", saveCurrentTopic);
+  copyBtn.addEventListener("click", copyTopic);
+  categoryEl.addEventListener("change", createTopic);
+
+  loadCategories()
+    .then(createTopic)
+    .catch(() => {
+      topicEl.textContent = "Không tải được danh mục";
+      metaEl.textContent = "Hãy chạy ứng dụng thông qua server Node.js.";
+    });
+
+  renderSaved();
+})();
+</script>
+</body>
+</html>
