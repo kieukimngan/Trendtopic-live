@@ -98,15 +98,87 @@ function fallbackTopic(label, hint) {
   const noun = label.replace(/^AI & /i,"AI và ").replace(/ & /g," và ").toLocaleLowerCase("vi");
   return fallbackTemplates[Math.floor(Math.random()*fallbackTemplates.length)].replace("{label}", noun);
 }
-function promptFor(headlines,label,style,hint) {
-  const styleRule = style==="creative" ? "Gợi mở, giàu sức hút nhưng không mơ hồ." : "Trung tính, rõ ràng, có chiều sâu.";
-  return `Bạn là biên tập viên. Từ các headline, tạo MỘT chủ đề thảo luận rộng bằng tiếng Việt, chỉ 3–9 từ.
-Phong cách: ${styleRule}
-${hint ? `Người dùng muốn nghiên cứu: ${hint}. Bám sát hướng này.` : ""}
-Không sao chép headline; không tên riêng, công ty, địa danh, số, ngày; không câu hỏi, dấu hai chấm hay lời giải thích; không chủ đề giá cả/thị trường.
+function promptFor(headlines, label, style, hint) {
+  const styleRule = style === "creative"
+    ? "Gợi mở, tự nhiên, có sức hút nhưng không mơ hồ."
+    : "Rõ ràng, trung tính và có chiều sâu.";
+
+  return `Bạn là biên tập viên tạo chủ đề thảo luận từ tin tức.
+
+Dựa vào các headline bên dưới, hãy tạo MỘT topic tiếng Việt, dài 2–7 từ.
+
+Yêu cầu bắt buộc:
+- Topic phải là một khía cạnh CỤ THỂ được nhắc đến hoặc thể hiện rõ trong các headline.
+- Ưu tiên một cụm danh từ có thể dùng làm chủ đề tranh luận, ví dụ:
+  "Bảo hiểm y tế miễn phí"
+  "Chi phí điều trị bệnh"
+  "Dữ liệu sức khỏe cá nhân"
+  "AI trong chẩn đoán"
+  "Xe điện giá rẻ"
+- Không tạo topic quá rộng hoặc chung chung như:
+  "Cơ hội và thách thức trong sức khỏe"
+  "Tương lai của công nghệ"
+  "Những thay đổi đang định hình xã hội"
+- Không dùng tên riêng, công ty, địa danh, số liệu, ngày tháng.
+- Không viết thành câu hỏi.
+- Không thêm giải thích, dấu hai chấm, dấu ngoặc hoặc dấu chấm.
+- Không chọn nội dung về giá cả, chứng khoán, doanh thu hoặc khuyến mãi.
+- Nếu có nhiều hướng, chọn chi tiết cụ thể nhất có khả năng mở ra thảo luận.
+- Phong cách: ${styleRule}
+${hint ? `- Người dùng muốn tìm hiểu: "${hint}". Chỉ bám sát hướng này nếu headline có liên quan.` : ""}
+
 Lĩnh vực: ${label}
+
 Headline:
-${headlines.map((x,i)=>`${i+1}. ${x.title}`).join("\n")}`;
+${headlines.map((x, i) => `${i + 1}. ${x.title}`).join("\n")}`;
+}
+Đồng thời tìm hàm fallbackTopic
+Hiện hàm này có thể tạo các topic rộng như:
+
+js
+Copy
+"Cơ hội và thách thức trong {label}"
+"Tương lai của {label}"
+Hãy thay toàn bộ hàm fallbackTopic(...) bằng:
+
+js
+Copy
+function fallbackTopic(label, hint) {
+  if (hint?.trim()) {
+    return hint
+      .trim()
+      .replace(/[?.!]+$/g, "")
+      .slice(0, 90);
+  }
+
+  const fallbackByCategory = {
+    health: "Bảo hiểm y tế miễn phí",
+    ai: "AI trong công việc",
+    tech: "Quyền riêng tư dữ liệu",
+    cyber: "Lừa đảo trực tuyến",
+    business: "Khởi nghiệp bền vững",
+    science: "Nghiên cứu y sinh",
+    space: "Du lịch không gian",
+    psychology: "Sức khỏe tinh thần",
+    environment: "Ô nhiễm không khí",
+    energy: "Điện mặt trời hộ gia đình",
+    education: "Kỹ năng số",
+    society: "Già hóa dân số",
+    culture: "Bản sắc văn hóa",
+    lifestyle: "Cân bằng công việc cuộc sống",
+    food: "An toàn thực phẩm",
+    design: "Không gian sống xanh",
+    travel: "Du lịch bền vững",
+    mobility: "Xe điện đô thị",
+    work: "Làm việc từ xa",
+    world: "Chính sách công toàn cầu",
+    sports: "Sức khỏe vận động"
+  };
+
+  const categoryId = Object.entries(categories)
+    .find(([, item]) => item.label === label)?.[0];
+
+  return fallbackByCategory[categoryId] || "Một vấn đề đáng thảo luận";
 }
 function sanitizeTopic(text="") {
   return text.replace(/["“”'`*_#]/g,"").replace(/[\r\n:;.!?]+/g," ").replace(/\s+/g," ").trim();
