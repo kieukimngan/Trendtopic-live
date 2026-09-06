@@ -38,7 +38,39 @@ label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08
 const category=$("category"),scope=$("scope"),style=$("style"),query=$("query"),topic=$("topic"),badges=$("badges"),meta=$("meta"),signals=$("signals");
 const generateBtn=$("generateBtn"),anotherBtn=$("anotherBtn"),copyBtn=$("copyBtn"),saveBtn=$("saveBtn"),suggestBtn=$("suggestBtn"),suggestions=$("suggestions"),savedList=$("savedList"),savedCount=$("savedCount");let current=null;
 const esc=s=>{const d=document.createElement("div");d.textContent=s||"";return d.innerHTML}; const scopeLabel={vn:"Việt Nam",global:"Quốc tế",all:"Việt Nam + Quốc tế"};
-const getSaved=()=>{try{return JSON.parse(localStorage.getItem(STORE)||"[]")}catch{return[]}}; const setSaved=x=>localStorage.setItem(STORE,JSON.stringify(x));
+const getSaved = async () => {
+  try {
+    const response = await fetch("/api/saved-topics");
+    if (!response.ok) throw new Error("Không thể tải topic đã lưu");
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
+
+const setSaved = async (topic, category = "", sourceCount = 0) => {
+  const response = await fetch("/api/saved-topics", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      topic,
+      category,
+      sourceCount
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Không thể lưu topic");
+  }
+
+  return data;
+};
+
 function renderSaved(){const list=getSaved();savedCount.textContent=list.length?`(${list.length})`:"";$("savedSubtitle").textContent=list.length?`${list.length} topic được lưu trên thiết bị này.`:"Lưu lại để xem riêng bất cứ lúc nào.";
 savedList.innerHTML=list.length?list.map(x=>`<article class="saved-item"><div><h3>${esc(x.topic)}</h3><p>${esc(x.category)} · ${esc(x.scope)} · Lưu ${new Date(x.savedAt).toLocaleString("vi-VN",{dateStyle:"medium",timeStyle:"short"})}</p></div><button class="delete" data-delete="${esc(x.id)}">Xóa</button></article>`).join(""):`<div class="empty">Chưa có topic nào được lưu. Hãy quay lại Khám phá và bấm “Lưu topic”.</div>`;
 document.querySelectorAll("[data-delete]").forEach(b=>b.onclick=()=>{setSaved(getSaved().filter(x=>x.id!==b.dataset.delete));renderSaved()})}
