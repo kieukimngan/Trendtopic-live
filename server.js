@@ -6,12 +6,42 @@ import { fileURLToPath } from "node:url";
 
 dotenv.config();
 const app = express();
+
+app.use(express.json());
+
 const parser = new Parser({
   timeout: 15000,
   headers: { "User-Agent": "Mozilla/5.0 TrendTopicLive/3.0 (+research app)" }
 });
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 3000);
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+
+async function supabaseRequest(path, options = {}) {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error("Chưa cấu hình SUPABASE_URL hoặc SUPABASE_ANON_KEY.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...options,
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(`Lỗi Supabase: ${message}`);
+  }
+
+  if (response.status === 204) return null;
+  return response.json();
+}
+
 const CACHE_MS = Number(process.env.CACHE_MINUTES || 10) * 60 * 1000;
 
 const categories = {
@@ -226,4 +256,52 @@ app.get("/api/topic",async(req,res)=>{
     res.status(502).json({error:error.message || "Chưa lấy được nguồn tin phù hợp."});
   }
 });
+app.get("/api/saved-topics", async (req, res) => {
+  try {
+    const topics = await supabaseRequest(
+      "saved_topics?select=id,topic,category,source_count,created_at&order=created_at.desc"
+    );
+
+    res.json(topics);
+  } catch (error) {
+    console.error("Load saved topics error:", error.message);
+    res.status(500).json({
+      error: "Không thể tải các topic đã lưu."
+    });
+  }
+});
+
+app.post("/api/saved-topics", async (req, res) => {
+  try {
+    const topic = String(req.body.topic || "").trim().slice(0, 120);
+    const category = String(req.body.category || "").trim().slice(0, 80);
+    const sourceCount = Number(req.body.sourceCount || 0);
+
+    if (topic.length < 2) {
+      return res.status(400).json({
+        error: "Topic cần có ít nhất 2 ký tự."
+      });
+    }
+
+    const rows = await supabaseRequest("saved_topics", {
+      method: "POST",
+      headers: {
+        Prefer: "return=representation"
+      },
+      body: JSON.stringify([{
+        topic,
+        category,
+        source_count: Number.isFinite(sourceCount) ? sourceCount : 0
+      }])
+    });
+
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    console.error("Save topic error:", error.message);
+    res.status(500).json({
+      error: "Không thể lưu topic."
+    });
+  }
+});
+
 app.listen(PORT,()=>console.log(`TrendTopic Live v3: http://localhost:${PORT}`));
